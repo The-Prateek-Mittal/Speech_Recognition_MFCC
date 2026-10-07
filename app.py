@@ -14,15 +14,31 @@ st.set_page_config(
 # --- MODEL LOADING ---
 @st.cache_resource
 def load_models():
-    model_path = os.path.join("saved_model", "speaker_svm_model.joblib")
-    le_path = os.path.join("saved_model", "label_encoder.joblib")
+    # Check if they are in the 'saved_model' folder (local) or in the root folder (GitHub)
+    if os.path.exists(os.path.join("saved_model", "speaker_svm_model.joblib")):
+        model_path = os.path.join("saved_model", "speaker_svm_model.joblib")
+        le_path = os.path.join("saved_model", "label_encoder.joblib")
+    else:
+        model_path = "speaker_svm_model.joblib"
+        le_path = "label_encoder.joblib"
     
     if os.path.exists(model_path) and os.path.exists(le_path):
         model = joblib.load(model_path)
         le = joblib.load(le_path)
         return model, le
     else:
-        st.error("Model files not found! Please ensure 'saved_model' directory is present.")
+        st.error(f"Model files not found! Looking for: `{model_path}` and `{le_path}`")
+        
+        # Debugging information to help find where the files actually are
+        st.warning("### Debug Information")
+        st.write(f"**Current Working Directory:** `{os.getcwd()}`")
+        st.write("**Files in Current Directory:**", os.listdir("."))
+        
+        if os.path.exists("saved_model"):
+            st.write("**Files in `saved_model` folder:**", os.listdir("saved_model"))
+        else:
+            st.write("❌ The `saved_model` folder does not exist in the current directory.")
+            
         return None, None
 
 model, le = load_models()
